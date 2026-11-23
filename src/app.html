@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="柴油冰塊記帳">
+<meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<title>柴油冰塊記帳</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%8A%3C/text%3E%3C/svg%3E">
+<!-- UI 框架：Framework7 9.3.0 — https://github.com/framework7io/framework7 — MIT License, Copyright 2014-2026 Vladimir Kharlampidi -->
+<style>/*F7_CSS*/</style>
+<style>
+html.ios, html.md {
+  --f7-font-family: -apple-system, system-ui, "Segoe UI", Roboto, "PingFang TC", "Heiti TC",
+    "Microsoft JhengHei", "Noto Sans TC", "Noto Sans CJK TC", sans-serif;
+}
+:root {
+  --muted: rgba(0,0,0,.52);
+  --muted-2: rgba(0,0,0,.38);
+  --line: rgba(0,0,0,.08);
+  --line-strong: rgba(0,0,0,.18);
+  --input-bg: rgba(0,0,0,.035);
+  --hover: rgba(0,0,0,.03);
+  --err: #d92d20;
+  --err-bg: rgba(217,45,32,.10);
+  --warn: #b25e00;
+  --warn-bg: rgba(255,149,0,.14);
+  --info: rgba(0,0,0,.55);
+  --info-bg: rgba(0,0,0,.05);
+  --ok: #18864b;
+}
+html.dark {
+  --muted: rgba(255,255,255,.6);
+  --muted-2: rgba(255,255,255,.42);
+  --line: rgba(255,255,255,.10);
+  --line-strong: rgba(255,255,255,.24);
+  --input-bg: rgba(255,255,255,.06);
+  --hover: rgba(255,255,255,.04);
+  --err: #ff6b5f;
+  --err-bg: rgba(255,107,95,.16);
+  --warn: #ffb547;
+  --warn-bg: rgba(255,181,71,.16);
+  --info: rgba(255,255,255,.62);
+  --info-bg: rgba(255,255,255,.07);
+  --ok: #4cd38a;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding-bottom: 24px; }
+.ios .navbar-inner { justify-content: center; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* tabbar icons */
+.tabbar .icon { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; position: relative; }
+.tabbar .icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar .icon .badge[hidden] { display: none; }
+
+/* date bar */
+.date-bar { display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px; }
+.date-bar .button { flex: 0 0 auto; width: auto; min-width: 44px; height: 44px; padding: 0 10px; }
+.date-field { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.date-input {
+  width: 100%; max-width: 240px; min-height: 44px; box-sizing: border-box; padding: 6px 10px;
+  font: inherit; font-size: 17px; text-align: center; color: inherit;
+  background: var(--input-bg); border: 1px solid var(--line-strong); border-radius: 12px;
+}
+.date-input::-webkit-date-and-time-value { text-align: center; }
+.date-sub { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 12px; padding: 2px 12px 6px; font-size: 14px; color: var(--muted); }
+.date-sub a { cursor: pointer; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; background: var(--muted-2); }
+.status-dot.saved { background: var(--ok); }
+
+/* alerts */
+.alerts { margin: 6px 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.alert { display: flex; gap: 8px; align-items: flex-start; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; line-height: 1.45; }
+.alert .dot { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; }
+.alert.err { background: var(--err-bg); color: var(--err); } .alert.err .dot { background: var(--err); }
+.alert.warn { background: var(--warn-bg); color: var(--warn); } .alert.warn .dot { background: var(--warn); }
+.alert.info { background: var(--info-bg); color: var(--info); } .alert.info .dot { background: var(--muted-2); }
+.alert a { color: inherit; text-decoration: underline; cursor: pointer; }
+
+/* ledger cards */
+.lg-card { margin-left: 12px; margin-right: 12px; overflow: hidden; }
+.lg-head, .lg-row {
+  display: grid; grid-template-columns: minmax(5.6em, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 8px; align-items: center; padding: 8px 14px;
+}
+.lg-head { padding-top: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.lg-title { font-size: 18px; font-weight: 700; }
+.lg-title small { font-size: 12.5px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+.lg-colname { text-align: right; font-size: 13.5px; font-weight: 600; line-height: 1.25; }
+.lg-colname small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.lg-colname.y { color: var(--muted); cursor: pointer; }
+.lg-colname.y:hover { text-decoration: underline; }
+.lg-row { min-height: 44px; box-sizing: border-box; }
+.lg-row + .lg-row { border-top: 1px solid var(--line); }
+@media (hover: hover) { .lg-row:hover { background: var(--hover); } }
+.lg-label { font-size: 15.5px; line-height: 1.25; }
+.lg-label small { display: block; font-size: 12px; color: var(--muted); }
+.lg-y, .lg-t { text-align: right; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.lg-y { color: var(--muted); font-size: 15.5px; }
+.lg-t { font-size: 16.5px; }
+.lg-row.calc .lg-t { font-weight: 650; }
+.lg-row.strong .lg-label { font-weight: 650; }
+.lg-row.strong .lg-t { font-size: 19px; font-weight: 750; }
+.lg-row.total .lg-t { color: var(--f7-theme-color); }
+.lg-row.price .lg-label, .lg-row.price .lg-y { font-size: 13.5px; }
+.lg-row.price { min-height: 40px; }
+.carried { color: var(--muted-2); font-weight: 500 !important; }
+.sub { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.empty-mark { color: var(--muted-2); font-size: 13px; }
+.cell-mark { display: inline-block; padding: 1px 7px; margin-right: -7px; border-radius: 8px; }
+.cell-err .cell-mark { color: var(--err); background: var(--err-bg); }
+.cell-warn .cell-mark { color: var(--warn); background: var(--warn-bg); }
+
+.num-input {
+  width: 100%; box-sizing: border-box; height: 40px; padding: 0 10px;
+  font: inherit; font-size: 17px; text-align: right; font-variant-numeric: tabular-nums; color: inherit;
+  background: var(--input-bg); border: 1px solid var(--line-strong); border-radius: 10px;
+  -webkit-appearance: none; appearance: none; outline: none;
+}
+.num-input::placeholder { color: var(--muted-2); font-size: 14px; }
+.num-input:focus { border-color: var(--f7-theme-color); box-shadow: 0 0 0 3px rgba(var(--f7-theme-color-rgb), .18); }
+.lg-row.price .num-input { height: 34px; font-size: 16px; }
+.num-input.bad, .cell-err .num-input { border-color: var(--err); background: var(--err-bg); }
+.cell-warn .num-input { border-color: var(--warn); background: var(--warn-bg); }
+
+.hint { margin: 10px 16px 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.banner { margin: 12px 12px 0; padding: 12px 14px; border-radius: 12px; font-size: 14.5px; line-height: 1.5; }
+.banner.err { background: var(--err-bg); color: var(--err); }
+.banner.tip { background: rgba(var(--f7-theme-color-rgb), .10); }
+.banner .button { margin-top: 8px; }
+
+/* history / anomalies */
+.chip-n { display: inline-block; min-width: 20px; padding: 1px 6px; margin-left: 4px; border-radius: 10px; font-size: 12px; font-weight: 600; text-align: center; }
+.chip-n.err { background: var(--err-bg); color: var(--err); }
+.chip-n.warn { background: var(--warn-bg); color: var(--warn); }
+.chip-n.info { background: var(--info-bg); color: var(--info); }
+.list .item-subtitle, .list .item-text { font-variant-numeric: tabular-nums; }
+.sum-row { display: flex; gap: 8px; padding: 12px 12px 0; flex-wrap: wrap; }
+.sum-box { flex: 1 1 0; min-width: 90px; padding: 10px 12px; border-radius: 12px; background: var(--info-bg); }
+.sum-box b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+.sum-box span { font-size: 13px; color: var(--muted); }
+.sum-box.err b { color: var(--err); } .sum-box.warn b { color: var(--warn); }
+.seg-wrap { padding: 12px 12px 0; }
+.an-group-title { margin: 18px 16px 6px; font-size: 14px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+.an-group-title a { font-weight: 500; cursor: pointer; }
+.an-group { margin: 0 12px; display: flex; flex-direction: column; gap: 6px; }
+.empty-block { text-align: center; padding: 48px 24px; color: var(--muted); line-height: 1.6; }
+.empty-block b { display: block; font-size: 40px; margin-bottom: 6px; }
+
+/* settings */
+.set-note { margin: 6px 16px 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.set-actions { display: flex; flex-direction: column; gap: 10px; padding: 0 16px; }
+.set-actions .button { height: 44px; }
+.text-err { color: var(--err) !important; }
+.about { margin: 24px 16px 8px; font-size: 12.5px; color: var(--muted-2); line-height: 1.6; text-align: center; }
+.list input.bad { color: var(--err); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="view view-main safe-areas">
+    <div class="page">
+      <div class="navbar">
+        <div class="navbar-bg"></div>
+        <div class="navbar-inner">
+          <div class="title">柴油冰塊記帳</div>
+        </div>
+      </div>
+
+      <div class="toolbar tabbar tabbar-icons toolbar-bottom">
+        <div class="toolbar-inner">
+          <div class="toolbar-pane">
+            <a href="#tab-ledger" class="tab-link tab-link-active">
+              <i class="icon"><svg viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2.12 2.12 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></i>
+              <span class="tabbar-label">記帳</span>
+            </a>
+            <a href="#tab-history" class="tab-link">
+              <i class="icon"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></i>
+              <span class="tabbar-label">歷史</span>
+            </a>
+            <a href="#tab-anomaly" class="tab-link">
+              <i class="icon"><svg viewBox="0 0 24 24"><path d="M10.3 4.2 2.6 17.5A2 2 0 0 0 4.3 20.5h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4.5M12 17.2v.3"/></svg><span class="badge color-red" id="anomalyBadge" hidden></span></i>
+              <span class="tabbar-label">異常</span>
+            </a>
+            <a href="#tab-settings" class="tab-link">
+              <i class="icon"><svg viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></i>
+              <span class="tabbar-label">設定</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div id="tab-ledger" class="page-content tab tab-active"><div class="wrap" id="ledger"></div></div>
+        <div id="tab-history" class="page-content tab"><div class="wrap" id="history"></div></div>
+        <div id="tab-anomaly" class="page-content tab"><div class="wrap" id="anomaly"></div></div>
+        <div id="tab-settings" class="page-content tab"><div class="wrap" id="settings"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script>/*F7_JS*/</script>
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 基本設定 ================= */
+  var KEY = 'dieselIceLedger.v1';
+  var IN_FIELDS = ['dieselBuy', 'dieselUse', 'hygMake', 'hygSell', 'normMake', 'normSell', 'cash'];
+  var PRICE_FIELDS = ['priceHyg', 'priceNorm'];
+  var FIELD_NAME = {
+    dieselBuy: '買柴油', dieselUse: '用柴油',
+    hygMake: '衛生冰做了幾包', hygSell: '衛生冰賣了幾包',
+    normMake: '普通冰做了幾塊', normSell: '普通冰賣了幾塊',
+    cash: '實收現金', priceHyg: '衛生冰一包價錢', priceNorm: '普通冰一塊價錢'
+  };
+  var WD = ['日', '一', '二', '三', '四', '五', '六'];
+
+  // 記帳頁的卡片與每一列；in = 直接輸入，calc = 自動算，price = 當天價錢（輸入）
+  var CARDS = [
+    { title: '柴油', unit: '公升', rows: [
+      { k: 'dieselBuy', label: '買柴油', type: 'in', mode: 'decimal' },
+      { k: 'dieselUse', label: '用柴油', type: 'in', mode: 'decimal' },
+      { k: 'dieselLeft', label: '剩下柴油', type: 'calc', strong: true }
+    ] },
+    { title: '衛生冰', unit: '包', rows: [
+      { k: 'hygMake', label: '做了幾包', type: 'in', mode: 'numeric' },
+      { k: 'hygSell', label: '賣了幾包', type: 'in', mode: 'numeric' },
+      { k: 'hygLeft', label: '剩下幾包', type: 'calc', strong: true },
+      { k: 'priceHyg', label: '一包價錢', unit: '元', type: 'price', mode: 'decimal' }
+    ] },
+    { title: '普通冰', unit: '塊', rows: [
+      { k: 'normMake', label: '做了幾塊', type: 'in', mode: 'numeric' },
+      { k: 'normSell', label: '賣了幾塊', type: 'in', mode: 'numeric' },
+      { k: 'normLeft', label: '剩下幾塊', type: 'calc', strong: true },
+      { k: 'priceNorm', label: '一塊價錢', unit: '元', type: 'price', mode: 'decimal' }
+    ] },
+    { title: '錢', unit: '元', rows: [
+      { k: 'sales', label: '賣了多少錢', unit: '包數×包價＋塊數×塊價', type: 'calc' },
+      { k: 'cash', label: '實收現金', type: 'in', mode: 'numeric' },
+      { k: 'ar', label: '應收帳款', unit: '累計', type: 'calc' },
+      { k: 'cashCum', label: '累計現金', unit: '開頭現金＋每天實收', type: 'calc' },
+      { k: 'total', label: '總共剩多少錢', unit: '累計現金＋應收帳款', type: 'calc', strong: true, cls: 'total' }
+    ] }
+  ];
+
+  /* ================= 小工具 ================= */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function toStr(dt) { return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()); }
+  function parseDate(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function todayStr() { return toStr(new Date()); }
+  function addDays(s, n) { var d = parseDate(s); d.setDate(d.getDate() + n); return toStr(d); }
+  function daysBetween(a, b) { return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
+  function isDateStr(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(parseDate(s)); }
+  function shortDate(s) { var d = parseDate(s); return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）'; }
+  function longDate(s) { var d = parseDate(s); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）'; }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  var nf = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 2 });
+  function fmt(n) { return n == null || isNaN(n) ? '—' : nf.format(n); }
+  function money(n) { return fmt(n) + ' 元'; }
+  function isNum(v) { return typeof v === 'number' ? isFinite(v) : (typeof v === 'string' && v.trim() !== '' && isFinite(Number(v))); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  // 把輸入文字轉成數字：空白 → null；不是數字 → NaN；支援全形數字與千分位逗號
+  function parseNum(str) {
+    if (str == null) return null;
+    var s = String(str).replace(/[！-～]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); })
+      .replace(/[,\s　]/g, '');
+    if (s === '') return null;
+    if (!/^-?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    return Number(s);
+  }
+
+  /* ================= 資料 ================= */
+  function defaults() {
+    return {
+      v: 1,
+      settings: {
+        opening: { diesel: 0, hyg: 0, norm: 0, cash: 0, ar: 0 },
+        price: { hyg: 0, norm: 0 },
+        anomaly: { dieselSpikePct: 50, arLimit: 0 },
+        theme: 'auto'
+      },
+      records: {}
+    };
+  }
+  function normalize(d) {
+    var s = defaults();
+    if (!d || typeof d !== 'object') return s;
+    var st = d.settings || {};
+    ['opening', 'price', 'anomaly'].forEach(function (g) {
+      if (st[g] && typeof st[g] === 'object') {
+        Object.keys(s.settings[g]).forEach(function (k) { if (isNum(st[g][k])) s.settings[g][k] = Number(st[g][k]); });
+      }
+    });
+    if (['auto', 'ios', 'md'].indexOf(st.theme) >= 0) s.settings.theme = st.theme;
+    var recs = d.records || {};
+    Object.keys(recs).forEach(function (date) {
+      var src = recs[date];
+      if (!isDateStr(date) || !src || typeof src !== 'object') return;
+      var r = {};
+      IN_FIELDS.concat(PRICE_FIELDS).forEach(function (k) { r[k] = isNum(src[k]) ? Number(src[k]) : null; });
+      if (!('priceHyg' in src)) r.priceHyg = s.settings.price.hyg;
+      if (!('priceNorm' in src)) r.priceNorm = s.settings.price.norm;
+      s.records[date] = r;
+    });
+    return s;
+  }
+
+  var storageOK = (function () {
+    try { var t = '__t' + Date.now(); localStorage.setItem(t, '1'); localStorage.removeItem(t); return true; }
+    catch (e) { return false; }
+  })();
+  var loadError = '';
+  function load() {
+    if (!storageOK) return defaults();
+    try {
+      var raw = localStorage.getItem(KEY);
+      return raw ? normalize(JSON.parse(raw)) : defaults();
+    } catch (e) {
+      loadError = '讀取資料時出錯：' + e.message;
+      return defaults();
+    }
+  }
+  var state = load();
+  function save() {
+    if (!storageOK) return;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { toast('存檔失敗：' + e.message); }
+  }
+  function newRecord() {
+    var r = {};
+    IN_FIELDS.forEach(function (k) { r[k] = null; });
+    r.priceHyg = state.settings.price.hyg;
+    r.priceNorm = state.settings.price.norm;
+    return r;
+  }
+  function isBlankRecord(r) {
+    return IN_FIELDS.every(function (k) { return r[k] == null; }) &&
+      r.priceHyg === state.settings.price.hyg && r.priceNorm === state.settings.price.norm;
+  }
+
+  /* ================= 計算 ================= */
+  // 依日期由舊到新，從開頭數字一路往下推
+  function compute() {
+    var op = state.settings.opening;
+    var dates = Object.keys(state.records).sort();
+    var by = {};
+    var b = { dieselLeft: op.diesel, hygLeft: op.hyg, normLeft: op.norm, cashCum: op.cash, ar: op.ar };
+    var opening = Object.assign({}, b, { total: r2(op.cash + op.ar) });
+    dates.forEach(function (d) {
+      var r = state.records[d];
+      var v = function (k) { return r[k] == null ? 0 : r[k]; };
+      var sales = r2(v('hygSell') * v('priceHyg') + v('normSell') * v('priceNorm'));
+      b = {
+        dieselLeft: r2(b.dieselLeft + v('dieselBuy') - v('dieselUse')),
+        hygLeft: r2(b.hygLeft + v('hygMake') - v('hygSell')),
+        normLeft: r2(b.normLeft + v('normMake') - v('normSell')),
+        cashCum: r2(b.cashCum + v('cash')),
+        ar: r2(b.ar + sales - v('cash'))
+      };
+      by[d] = Object.assign({}, b, { sales: sales, dayAR: r2(sales - v('cash')), total: r2(b.cashCum + b.ar) });
+    });
+    return { dates: dates, by: by, opening: opening };
+  }
+  function lastBefore(dates, d) {
+    for (var i = dates.length - 1; i >= 0; i--) if (dates[i] < d) return dates[i];
+    return null;
+  }
+  // 某天的結果；那天沒記就用最近一筆帶過來
+  function stateAt(C, d) {
+    if (C.by[d]) return C.by[d];
+    var prev = lastBefore(C.dates, d);
+    var base = prev ? C.by[prev] : C.opening;
+    return Object.assign({}, base, { sales: null, dayAR: null, carried: true, from: prev });
+  }
+
+  /* ================= 帳本異常 ================= */
+  function detect(C) {
+    var st = state.settings, A = {};
+    function add(d, lvl, msg, fields, extra) { (A[d] = A[d] || []).push(Object.assign({ lvl: lvl, msg: msg, f: fields || [] }, extra)); }
+    // 變負數：第一次變負的那天算錯誤；之後還是負的而且更嚴重，提醒「從哪天開始」
+    var NEG = [
+      { k: 'dieselLeft', name: '剩下柴油', unit: ' 公升', why: '用的比有的還多', f: ['dieselLeft', 'dieselUse'] },
+      { k: 'hygLeft', name: '衛生冰剩下', unit: ' 包', why: '賣的比有的還多', f: ['hygLeft', 'hygSell'] },
+      { k: 'normLeft', name: '普通冰剩下', unit: ' 塊', why: '賣的比有的還多', f: ['normLeft', 'normSell'] },
+      { k: 'ar', name: '應收帳款', unit: ' 元', why: '收到的錢比賣的加上欠的還多', f: ['ar', 'cash'] }
+    ];
+    var negSince = {};
+    var prevC = C.opening;
+    C.dates.forEach(function (d, i) {
+      var r = state.records[d], c = C.by[d];
+      IN_FIELDS.concat(PRICE_FIELDS).forEach(function (k) {
+        if (r[k] != null && r[k] < 0) add(d, 'err', FIELD_NAME[k] + '是負數（' + fmt(r[k]) + '）', [k]);
+      });
+      NEG.forEach(function (n) {
+        if (c[n.k] >= 0) { delete negSince[n.k]; return; }
+        if (prevC[n.k] >= 0 || !negSince[n.k]) {
+          negSince[n.k] = d;
+          add(d, 'err', n.name + '變負數（' + fmt(c[n.k]) + n.unit + '）：' + n.why, n.f);
+        } else if (c[n.k] < prevC[n.k]) {
+          add(d, 'warn', n.name + '還是負數，而且更少了（' + fmt(c[n.k]) + n.unit + '）。從 ' + shortDate(negSince[n.k]) + ' 開始變負的，請先檢查那天', n.f);
+        }
+      });
+
+      var use = r.dieselUse;
+      var pct = st.anomaly.dieselSpikePct;
+      if (use > 0 && pct > 0) {
+        var prevUses = [];
+        for (var j = i - 1; j >= 0 && prevUses.length < 7; j--) {
+          var u = state.records[C.dates[j]].dieselUse;
+          if (u > 0) prevUses.push(u);
+        }
+        if (prevUses.length >= 3) {
+          var avg = prevUses.reduce(function (a, x) { return a + x; }, 0) / prevUses.length;
+          if (use > avg * (1 + pct / 100)) {
+            add(d, 'warn', '用柴油 ' + fmt(use) + ' 公升，比前 ' + prevUses.length + ' 天平均 ' + fmt(r2(avg)) +
+              ' 公升多了 ' + Math.round((use / avg - 1) * 100) + '%', ['dieselUse']);
+          }
+        }
+      }
+      var made = (r.hygMake || 0) + (r.normMake || 0);
+      if (made > 0 && !(use > 0)) add(d, 'warn', '有做冰，但沒有記用了多少柴油', ['dieselUse']);
+      if (use > 0 && !(made > 0)) add(d, 'warn', '用了 ' + fmt(use) + ' 公升柴油，但沒有做冰', ['dieselUse', 'hygMake', 'normMake']);
+      if (r.hygSell > 0 && !(r.priceHyg > 0)) add(d, 'warn', '有賣衛生冰，但一包價錢是 0', ['priceHyg', 'sales']);
+      if (r.normSell > 0 && !(r.priceNorm > 0)) add(d, 'warn', '有賣普通冰，但一塊價錢是 0', ['priceNorm', 'sales']);
+      // 應收帳款上限：剛超過的那天、和最新一筆（如果還超過）才提醒，免得每天重複
+      var lim = st.anomaly.arLimit;
+      var isLast = i === C.dates.length - 1;
+      if (lim > 0 && c.ar > lim && (prevC.ar <= lim || isLast)) {
+        add(d, 'warn', '應收帳款累計 ' + money(c.ar) + '，超過上限 ' + money(lim), ['ar']);
+      }
+
+      if (i > 0) {
+        var gap = daysBetween(C.dates[i - 1], d) - 1;
+        if (gap > 0) add(d, 'info', '跟上一筆（' + shortDate(C.dates[i - 1]) + '）中間有 ' + gap + ' 天沒記帳', [], { gap: true });
+      }
+      var empty = IN_FIELDS.filter(function (k) { return r[k] == null; });
+      if (empty.length) add(d, 'info', '有 ' + empty.length + ' 格沒填：' + empty.map(function (k) { return FIELD_NAME[k]; }).join('、'), empty);
+      prevC = c;
+    });
+    var today = todayStr(), last = C.dates[C.dates.length - 1];
+    if (last && last < addDays(today, -1)) {
+      add(today, 'info', '最後一筆紀錄是 ' + shortDate(last) + '，到昨天為止有 ' + (daysBetween(last, today) - 1) + ' 天沒記帳');
+    }
+    return A;
+  }
+
+  var C, A;
+  function recalc() { C = compute(); A = detect(C); updateBadge(); }
+
+  /* ================= Framework7 ================= */
+  var app = new Framework7({
+    el: '#app',
+    name: '柴油冰塊記帳',
+    theme: state.settings.theme,
+    darkMode: 'auto',
+    colors: { primary: '#0a6cff' },
+    dialog: { buttonOk: '確定', buttonCancel: '取消' }
+  });
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  function toast(text) { app.toast.create({ text: text, closeTimeout: 2000, position: 'center' }).open(); }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+  // 放在網址上時，註冊離線快取（直接開本機檔案時不需要）
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+
+  function updateBadge() {
+    var n = 0;
+    Object.keys(A).forEach(function (d) { A[d].forEach(function (a) { if (a.lvl !== 'info') n++; }); });
+    var b = $('#anomalyBadge');
+    if (!b) return;
+    b.textContent = n > 99 ? '99+' : String(n);
+    b.hidden = n === 0;
+  }
+
+  /* ================= 記帳頁 ================= */
+  var sel = todayStr();
+
+  function renderLedger() {
+    var today = todayStr();
+    if (sel > today) sel = today;
+    var y = addDays(sel, -1);
+    var isToday = sel === today;
+    var yName = isToday ? '昨天' : '前一天', tName = isToday ? '今天' : '這一天';
+    var h = '';
+    if (!storageOK) {
+      h += '<div class="banner err"><b>這個瀏覽器不能存資料。</b>關掉頁面後輸入的數字會不見。' +
+        'iPhone 請不要用「檔案」預覽開啟，改用 Safari 開網址；或換一個瀏覽器。</div>';
+    }
+    if (loadError) h += '<div class="banner err">' + esc(loadError) + '</div>';
+    h += '<div class="date-bar">' +
+      '<button class="button button-tonal" id="btnPrev" aria-label="前一天">‹ 前一天</button>' +
+      '<div class="date-field"><input class="date-input" type="date" id="dateInput" max="' + today + '" value="' + sel + '" aria-label="日期"></div>' +
+      '<button class="button button-tonal" id="btnNext" aria-label="後一天"' + (isToday ? ' disabled' : '') + '>後一天 ›</button>' +
+      '</div>';
+    h += '<div class="date-sub"><span id="dayStatus"></span>' +
+      (isToday ? '<a class="link" id="btnEditY">補記／修改昨天</a>' : '<a class="link" id="btnToday">回到今天</a>') + '</div>';
+    h += '<div class="alerts" id="dayAlerts"></div>';
+
+    CARDS.forEach(function (card) {
+      h += '<div class="card lg-card"><div class="lg-head">' +
+        '<div class="lg-title">' + card.title + '<small>' + card.unit + '</small></div>' +
+        '<div class="lg-colname y" data-goto="' + y + '" title="點一下改' + yName + '">' + yName + '<small>' + shortDate(y) + '</small></div>' +
+        '<div class="lg-colname">' + tName + '<small>' + shortDate(sel) + '</small></div>' +
+        '</div>';
+      card.rows.forEach(function (row) {
+        var cls = 'lg-row ' + (row.type === 'calc' ? 'calc' : row.type === 'price' ? 'price' : 'input') +
+          (row.strong ? ' strong' : '') + (row.cls ? ' ' + row.cls : '');
+        h += '<div class="' + cls + '">' +
+          '<div class="lg-label">' + row.label + (row.unit ? '<small>' + row.unit + '</small>' : '') + '</div>' +
+          '<div class="lg-y" data-y="' + row.k + '"></div>' +
+          '<div class="lg-t" data-t="' + row.k + '">' +
+          (row.type === 'calc' ? '' :
+            '<input class="num-input" data-k="' + row.k + '" type="text" inputmode="' + row.mode + '" enterkeyhint="next" ' +
+            'autocomplete="off" placeholder="輸入" aria-label="' + tName + row.label + '">') +
+          '</div></div>';
+      });
+      h += '</div>';
+    });
+    h += '<p class="hint">輸入數字會自動計算、自動儲存。「剩下」從' + yName + '接著算；' + yName + '沒記帳的話，從最近一筆有記的日子接著算。</p>';
+    $('#ledger').innerHTML = h;
+
+    var rec = state.records[sel];
+    $$('#ledger .num-input').forEach(function (inp) {
+      var k = inp.dataset.k, v;
+      if (PRICE_FIELDS.indexOf(k) >= 0) v = rec ? rec[k] : (k === 'priceHyg' ? state.settings.price.hyg : state.settings.price.norm);
+      else v = rec ? rec[k] : null;
+      inp.value = v == null ? '' : String(v);
+    });
+    refreshLedger();
+  }
+
+  function cellHTML(val, kind) {
+    if (kind === 'empty') return '<span class="empty-mark">沒填</span>';
+    if (kind === 'none') return '<span class="empty-mark">—</span>';
+    return '<span class="cell-mark num">' + fmt(val) + '</span>';
+  }
+
+  function refreshLedger() {
+    if (!$('#ledger .lg-card')) return;
+    var y = addDays(sel, -1);
+    var isToday = sel === todayStr();
+    var yRec = state.records[y], tRec = state.records[sel];
+    var yS = stateAt(C, y), tS = stateAt(C, sel);
+
+    CARDS.forEach(function (card) {
+      card.rows.forEach(function (row) {
+        var k = row.k;
+        // 昨天欄
+        var yc = $('#ledger [data-y="' + k + '"]');
+        if (row.type === 'calc') {
+          var yv = yS[k];
+          var html = (k === 'sales' && yS.carried) ? cellHTML(null, 'none') : cellHTML(yv);
+          if (k === 'ar' && yS.dayAR) html += '<span class="sub">當天 ' + (yS.dayAR > 0 ? '+' : '') + fmt(yS.dayAR) + '</span>';
+          yc.innerHTML = html;
+          yc.classList.toggle('carried', !!yS.carried && k !== 'sales');
+        } else {
+          yc.innerHTML = !yRec ? cellHTML(null, 'none') : yRec[k] == null ? cellHTML(null, 'empty') : cellHTML(yRec[k]);
+        }
+        // 今天欄（計算格）
+        if (row.type === 'calc') {
+          var tc = $('#ledger [data-t="' + k + '"]');
+          var th = (k === 'sales' && tS.carried) ? cellHTML(0) : cellHTML(tS[k]);
+          if (k === 'ar' && tS.dayAR) th += '<span class="sub">今天 ' + (tS.dayAR > 0 ? '+' : '') + fmt(tS.dayAR) + '</span>';
+          tc.innerHTML = th;
+          tc.classList.toggle('carried', !!tS.carried);
+        }
+      });
+    });
+
+    // 標出有問題的格子
+    $$('#ledger .cell-err, #ledger .cell-warn').forEach(function (el) { el.classList.remove('cell-err', 'cell-warn'); });
+    function mark(list, attr) {
+      (list || []).forEach(function (a) {
+        if (a.lvl === 'info') return;
+        a.f.forEach(function (k) {
+          var el = $('#ledger [' + attr + '="' + k + '"]');
+          if (!el) return;
+          if (a.lvl === 'err') { el.classList.remove('cell-warn'); el.classList.add('cell-err'); }
+          else if (!el.classList.contains('cell-err')) el.classList.add('cell-warn');
+        });
+      });
+    }
+    mark(A[y], 'data-y');
+    mark(A[sel], 'data-t');
+
+    // 狀態與提示
+    var status = $('#dayStatus');
+    status.innerHTML = tRec
+      ? '<span class="status-dot saved"></span>' + (isToday ? '今天' : '這天') + '已記錄（自動儲存）'
+      : '<span class="status-dot"></span>' + (isToday ? '今天' : '這天') + '還沒記錄，輸入後自動儲存';
+
+    var alerts = '';
+    var lvlOrder = { err: 0, warn: 1, info: 2 };
+    var list = (A[sel] || []).slice().sort(function (a, b) { return lvlOrder[a.lvl] - lvlOrder[b.lvl]; });
+    if (!C.dates.length) {
+      alerts += '<div class="banner tip"><b>第一次使用？</b>先到「設定」填開頭剩下的柴油、冰、現金、應收帳款，還有冰的售價，再回來記每天的數字。' +
+        '<br><a class="button button-fill button-small" id="btnGoSettings" style="display:inline-flex;width:auto">去設定</a></div>';
+    } else if (!yRec && lastBefore(C.dates, y)) {
+      list = list.filter(function (a) { return !a.gap; });
+      list.push({ lvl: 'info', msg: (isToday ? '昨天' : '前一天') + '（' + shortDate(y) + '）沒有記帳，剩下的數字是從 ' +
+        shortDate(lastBefore(C.dates, y)) + ' 帶過來的', goto: y });
+    }
+    list.forEach(function (a) {
+      alerts += '<div class="alert ' + a.lvl + '"><span class="dot"></span><div>' + esc(a.msg) +
+        (a.goto ? '　<a data-goto="' + a.goto + '">去補記</a>' : '') + '</div></div>';
+    });
+    $('#dayAlerts').innerHTML = alerts;
+  }
+
+  function goDate(d, switchTab) {
+    var today = todayStr();
+    if (!isDateStr(d)) return;
+    sel = d > today ? today : d;
+    renderLedger();
+    if (switchTab) app.tab.show('#tab-ledger');
+    var pc = $('#tab-ledger');
+    if (pc) pc.scrollTop = 0;
+  }
+
+  var ledgerEl = $('#ledger');
+  ledgerEl.addEventListener('input', function (e) {
+    var inp = e.target.closest && e.target.closest('.num-input');
+    if (!inp) return;
+    var k = inp.dataset.k, v = parseNum(inp.value);
+    inp.classList.toggle('bad', Number.isNaN(v));
+    var rec = state.records[sel];
+    if (!rec) { rec = newRecord(); state.records[sel] = rec; }
+    rec[k] = Number.isNaN(v) ? null : v;
+    if (isBlankRecord(rec)) delete state.records[sel];
+    save();
+    recalc();
+    refreshLedger();
+  });
+  ledgerEl.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !e.target.classList.contains('num-input')) return;
+    e.preventDefault();
+    var all = $$('#ledger .num-input');
+    var next = all[all.indexOf(e.target) + 1];
+    if (next) { next.focus(); next.select(); } else e.target.blur();
+  });
+  ledgerEl.addEventListener('change', function (e) {
+    if (e.target.id === 'dateInput' && isDateStr(e.target.value)) goDate(e.target.value);
+  });
+  ledgerEl.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('#btnPrev, #btnNext, #btnToday, #btnEditY, #btnGoSettings, [data-goto]') : null;
+    if (!t) return;
+    e.preventDefault();
+    if (t.id === 'btnPrev') goDate(addDays(sel, -1));
+    else if (t.id === 'btnNext') goDate(addDays(sel, 1));
+    else if (t.id === 'btnToday') goDate(todayStr());
+    else if (t.id === 'btnEditY') goDate(addDays(sel, -1));
+    else if (t.id === 'btnGoSettings') app.tab.show('#tab-settings');
+    else if (t.dataset.goto) goDate(t.dataset.goto);
+  });
+
+  /* ================= 歷史頁 ================= */
+  function countBy(list) {
+    var c = { err: 0, warn: 0, info: 0 };
+    (list || []).forEach(function (a) { c[a.lvl]++; });
+    return c;
+  }
+  function chips(list, withInfo) {
+    var c = countBy(list), h = '';
+    if (c.err) h += '<span class="chip-n err">錯 ' + c.err + '</span>';
+    if (c.warn) h += '<span class="chip-n warn">注意 ' + c.warn + '</span>';
+    if (withInfo && c.info) h += '<span class="chip-n info">提醒 ' + c.info + '</span>';
+    return h;
+  }
+  function renderHistory() {
+    var dates = C.dates.slice().reverse();
+    if (!dates.length) {
+      $('#history').innerHTML = '<div class="empty-block"><b>📒</b>還沒有任何紀錄。<br>到「記帳」輸入第一天的數字吧。</div>';
+      return;
+    }
+    var h = '<div class="block-title">共 ' + dates.length + ' 天的紀錄（點一下可以修改）</div>' +
+      '<div class="list media-list list-strong-ios list-dividers-ios list-outline-ios inset-md"><ul>';
+    dates.forEach(function (d) {
+      var c = C.by[d], r = state.records[d];
+      h += '<li><a href="#" class="item-link item-content" data-goto="' + d + '"><div class="item-inner">' +
+        '<div class="item-title-row"><div class="item-title">' + longDate(d) + '</div><div class="item-after">' + chips(A[d]) + '</div></div>' +
+        '<div class="item-subtitle">賣 ' + money(c.sales) + '・收 ' + money(r.cash) + '・應收 ' + money(c.ar) + '</div>' +
+        '<div class="item-text">總共 ' + money(c.total) + '・柴油剩 ' + fmt(c.dieselLeft) + ' 公升・衛生冰剩 ' + fmt(c.hygLeft) +
+        ' 包・普通冰剩 ' + fmt(c.normLeft) + ' 塊</div>' +
+        '</div></a></li>';
+    });
+    h += '</ul></div>';
+    $('#history').innerHTML = h;
+  }
+  $('#history').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-goto]');
+    if (!t) return;
+    e.preventDefault();
+    goDate(t.dataset.goto, true);
+  });
+
+  /* ================= 異常頁 ================= */
+  var showInfo = false;
+  function renderAnomaly() {
+    var total = { err: 0, warn: 0, info: 0 };
+    var dates = Object.keys(A).sort().reverse();
+    dates.forEach(function (d) { var c = countBy(A[d]); total.err += c.err; total.warn += c.warn; total.info += c.info; });
+    var h = '<div class="sum-row">' +
+      '<div class="sum-box err"><b>' + total.err + '</b><span>錯誤（一定要看）</span></div>' +
+      '<div class="sum-box warn"><b>' + total.warn + '</b><span>注意（可能有問題）</span></div>' +
+      '<div class="sum-box"><b>' + total.info + '</b><span>提醒（漏記、沒填）</span></div>' +
+      '</div>';
+    h += '<div class="seg-wrap"><div class="segmented segmented-strong">' +
+      '<button class="button' + (showInfo ? '' : ' button-active') + '" data-filter="0">只看錯誤和注意</button>' +
+      '<button class="button' + (showInfo ? ' button-active' : '') + '" data-filter="1">全部</button>' +
+      '<span class="segmented-highlight"></span></div></div>';
+    var shown = 0, lvlOrder = { err: 0, warn: 1, info: 2 };
+    dates.forEach(function (d) {
+      var list = A[d].filter(function (a) { return showInfo || a.lvl !== 'info'; })
+        .sort(function (a, b) { return lvlOrder[a.lvl] - lvlOrder[b.lvl]; });
+      if (!list.length) return;
+      shown++;
+      h += '<div class="an-group-title"><span>' + longDate(d) + '</span><a class="link" data-goto="' + d + '">去看這天 ›</a></div><div class="an-group">';
+      list.forEach(function (a) { h += '<div class="alert ' + a.lvl + '"><span class="dot"></span><div>' + esc(a.msg) + '</div></div>'; });
+      h += '</div>';
+    });
+    if (!shown) {
+      h += '<div class="empty-block"><b>✅</b>' + (C.dates.length ? '帳本目前沒有發現' + (showInfo ? '' : '錯誤或需要注意的') + '異常。' : '還沒有紀錄。') + '</div>';
+    }
+    h += '<p class="hint">檢查的項目：剩下的柴油／冰／應收帳款變成負數、輸入負數、柴油用量比前 7 天平均多太多、' +
+      '做冰沒用柴油或用柴油沒做冰、有賣冰但價錢是 0、應收帳款超過上限、漏記日期、欄位沒填。門檻可以在「設定」改。</p>';
+    $('#anomaly').innerHTML = h;
+  }
+  $('#anomaly').addEventListener('click', function (e) {
+    var f = e.target.closest('[data-filter]');
+    if (f) { showInfo = f.dataset.filter === '1'; renderAnomaly(); return; }
+    var t = e.target.closest('[data-goto]');
+    if (t) { e.preventDefault(); goDate(t.dataset.goto, true); }
+  });
+
+  /* ================= 設定頁 ================= */
+  var SET_GROUPS = [
+    { title: '開頭剩下的數字', note: '第一筆紀錄之前就有的數量；之後每天都從這裡接著算。', items: [
+      { path: 'opening.diesel', label: '柴油（公升）', mode: 'decimal' },
+      { path: 'opening.hyg', label: '衛生冰（包）', mode: 'numeric' },
+      { path: 'opening.norm', label: '普通冰（塊）', mode: 'numeric' },
+      { path: 'opening.cash', label: '現金（元）', mode: 'numeric' },
+      { path: 'opening.ar', label: '應收帳款（元）', mode: 'numeric' }
+    ] },
+    { title: '冰的售價', note: '改價錢只影響之後新記的日子，已經記過的日子保留當天的價錢（要改某一天的價錢，到記帳頁改那天的「一包價錢／一塊價錢」）。', items: [
+      { path: 'price.hyg', label: '衛生冰一包（元）', mode: 'decimal' },
+      { path: 'price.norm', label: '普通冰一塊（元）', mode: 'decimal' }
+    ] },
+    { title: '異常提醒門檻', note: '柴油：要有前 3 天以上的用量才會比較。填 0 代表不檢查。', items: [
+      { path: 'anomaly.dieselSpikePct', label: '用柴油比前 7 天平均多幾 % 就提醒', mode: 'numeric' },
+      { path: 'anomaly.arLimit', label: '應收帳款累計超過多少元就提醒', mode: 'numeric' }
+    ] }
+  ];
+  function getPath(p) { var a = p.split('.'); return state.settings[a[0]][a[1]]; }
+  function setPath(p, v) { var a = p.split('.'); state.settings[a[0]][a[1]] = v; }
+
+  function renderSettings() {
+    var h = '';
+    SET_GROUPS.forEach(function (g) {
+      h += '<div class="block-title">' + g.title + '</div>' +
+        '<div class="list list-strong-ios list-dividers-ios list-outline-ios inset-md"><ul>';
+      g.items.forEach(function (it) {
+        h += '<li class="item-content item-input"><div class="item-inner">' +
+          '<div class="item-title item-label">' + it.label + '</div>' +
+          '<div class="item-input-wrap"><input type="text" inputmode="' + it.mode + '" data-set="' + it.path + '" placeholder="0" autocomplete="off"></div>' +
+          '</div></li>';
+      });
+      h += '</ul></div><p class="set-note">' + g.note + '</p>';
+    });
+    h += '<div class="block-title">外觀</div>' +
+      '<div class="list list-strong-ios list-dividers-ios list-outline-ios inset-md"><ul>' +
+      '<li class="item-content item-input"><div class="item-inner"><div class="item-title item-label">介面樣式</div>' +
+      '<div class="item-input-wrap input-dropdown-wrap"><select id="themeSelect">' +
+      '<option value="auto">自動（iPhone 用 iOS 樣式，其他用 Android 樣式）</option>' +
+      '<option value="ios">iOS 樣式</option><option value="md">Android（Material）樣式</option>' +
+      '</select></div></div></li></ul></div>' +
+      '<p class="set-note">深色／淺色會跟著手機或電腦的系統設定。</p>';
+    h += '<div class="block-title">備份</div><div class="set-actions">' +
+      '<button class="button button-fill" id="btnExport">下載備份檔</button>' +
+      '<button class="button button-tonal" id="btnImport">從備份檔還原</button>' +
+      '<button class="button text-err" id="btnClear">清除全部資料</button>' +
+      '</div>' +
+      '<p class="set-note">資料只存在這台裝置的這個瀏覽器裡。清除瀏覽器資料、換手機或換瀏覽器都會看不到，請定期下載備份檔。' +
+      (storageOK ? '' : '<br><b class="text-err">目前這個瀏覽器不能存資料。</b>') + '</p>' +
+      '<p class="about">柴油冰塊記帳・介面使用 Framework7（MIT 授權）</p>';
+    $('#settings').innerHTML = h;
+    fillSettings();
+  }
+  function fillSettings() {
+    $$('#settings [data-set]').forEach(function (inp) { inp.value = String(getPath(inp.dataset.set)); inp.classList.remove('bad'); });
+    $('#themeSelect').value = state.settings.theme;
+  }
+  var settingsEl = $('#settings');
+  settingsEl.addEventListener('input', function (e) {
+    var inp = e.target;
+    if (!inp.dataset || !inp.dataset.set) return;
+    var v = parseNum(inp.value);
+    inp.classList.toggle('bad', Number.isNaN(v));
+    if (Number.isNaN(v)) return;
+    setPath(inp.dataset.set, v == null ? 0 : v);
+    save();
+    recalc();
+    refreshLedger();
+  });
+  settingsEl.addEventListener('change', function (e) {
+    if (e.target.id !== 'themeSelect') return;
+    state.settings.theme = e.target.value;
+    save();
+    toast('套用新的樣式中…');
+    setTimeout(function () { location.reload(); }, 600);
+  });
+  settingsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'btnExport') exportData();
+    else if (b.id === 'btnImport') $('#importFile').click();
+    else if (b.id === 'btnClear') {
+      app.dialog.confirm('會刪掉所有每天的紀錄和設定，而且不能復原。建議先下載備份檔。確定要清除？', '清除全部資料', function () {
+        state = defaults();
+        save();
+        afterDataReplaced();
+        toast('已清除全部資料');
+      });
+    }
+  });
+
+  function exportData() {
+    var data = JSON.stringify(Object.assign({ app: '柴油冰塊記帳', exportedAt: new Date().toISOString() }, state), null, 2);
+    var blob = new Blob([data], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.className = 'external';
+    a.href = URL.createObjectURL(blob);
+    a.download = '柴油冰塊記帳備份-' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    toast('已下載備份檔');
+  }
+  $('#importFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    var input = this;
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      input.value = '';
+      var d;
+      try { d = JSON.parse(reader.result); } catch (err) { app.dialog.alert('這不是正確的備份檔。', '無法還原'); return; }
+      if (!d || typeof d !== 'object' || typeof d.records !== 'object' || typeof d.settings !== 'object') {
+        app.dialog.alert('這不是柴油冰塊記帳的備份檔。', '無法還原'); return;
+      }
+      var incoming = normalize(d);
+      var n = Object.keys(incoming.records).length, m = Object.keys(state.records).length;
+      app.dialog.confirm('備份檔裡有 ' + n + ' 天的紀錄。還原後會取代目前的資料（目前有 ' + m + ' 天）。確定要還原？', '從備份檔還原', function () {
+        var themeChanged = incoming.settings.theme !== state.settings.theme;
+        state = incoming;
+        save();
+        if (themeChanged) { location.reload(); return; }
+        afterDataReplaced();
+        toast('已還原 ' + n + ' 天的紀錄');
+      });
+    };
+    reader.readAsText(f);
+  });
+
+  function afterDataReplaced() {
+    recalc();
+    fillSettings();
+    renderLedger();
+    renderHistory();
+    renderAnomaly();
+  }
+
+  /* ================= 分頁切換 ================= */
+  app.on('tabShow', function (el) {
+    if (!el) return;
+    if (el.id === 'tab-history') renderHistory();
+    else if (el.id === 'tab-anomaly') renderAnomaly();
+    else if (el.id === 'tab-ledger') {
+      if (sel > todayStr()) sel = todayStr();
+      refreshLedger();
+    }
+  });
+
+  // 過了午夜回到頁面時，自動換成新的一天
+  var lastToday = todayStr();
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    var t = todayStr();
+    if (t !== lastToday) {
+      if (sel === lastToday) sel = t;
+      lastToday = t;
+      recalc();
+      renderLedger();
+    }
+  });
+
+  /* ================= 開始 ================= */
+  recalc();
+  renderSettings();
+  renderLedger();
+  renderHistory();
+  renderAnomaly();
+})();
+</script>
+</body>
+</html>
